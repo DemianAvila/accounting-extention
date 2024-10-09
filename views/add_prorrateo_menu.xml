@@ -1,0 +1,11 @@
+<odoo>
+    <data>
+        <menuitem
+        id="spreadsheet_dashboard_menu"
+        name="Dashboards"
+        parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root"
+        action="integra_dashboard_open"
+        sequence="1"
+        />
+    </data>
+</odoo>
