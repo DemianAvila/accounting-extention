@@ -1,13 +1,15 @@
 /** @odoo-module */
 
 class InvoiceLine {
-    constructor(id, invoice_id, product_id, product_name, price, qty) {
+    constructor(id, invoice_id, product_id, product_name, price, qty, tax) {
         this._id = id;
         this._invoice_id = invoice_id;
         this._product_id = product_id;
         this._product_name = product_name;
         this._price = price;
         this._qty = qty;
+        this._tax = tax;
+
     }
 
     get id() {
@@ -58,14 +60,23 @@ class InvoiceLine {
     set qty(value) {
         this._qty = value;
     }
+
+    get tax(){
+        return this._tax
+    }
+
+    set tax(value){
+        this._tax = value
+    }
 }
 
 class Invoice {
-    constructor(id, name, customer_name, products) {
+    constructor(id, name, customer_name, products, total_price) {
         this._id = id;
         this._name = name;
         this._customer_name = customer_name;
         this._products = products;  
+        this._total_price = total_price
     }
 
     get id() {
@@ -99,6 +110,14 @@ class Invoice {
     set products(value) {
         this._products = value;
     }
+
+    get total_price(){
+        return this._total_price
+    }
+
+    set total_price(value){
+        this._total_price = value
+    }
 }
 
 class InvoiceSelector {
@@ -107,29 +126,32 @@ class InvoiceSelector {
         this._selected_invoices = selected_invoices; 
     }
 
-    async getInvoicesFromModel(model){
+    async getInvoicesFromModel(){
         let model_invoices;
+        let response;
         this.invoices = []
-        console.log("====================")
-        console.log(model)
-        console.log("====================")
 
         try {
-            model_invoices = await model(
-                "/invoices"
+            response = await fetch(
+                URL= "invoices"
             )
+            model_invoices = await response.json()
+
+            model_invoices.invoices.forEach(invoice => {
+                let id = invoice.id
+                let name = invoice.name
+                this.invoices.push(
+                    new Invoice(
+                        id= id,
+                        name= name
+                    )
+                )
+            });
+
         } catch (error) {
             console.error('Error calling method: ', error);
         }
 
-        model_invoices.forEach(invoice => {
-            this._invoices.push(
-                new Invoice(
-                    id= invoice.id,
-                    name= invoice.name
-                )
-            )
-       });
     }
 
     getInvoiceDomElement(){
@@ -137,13 +159,96 @@ class InvoiceSelector {
         let optionElement = undefined;
         this.invoices.forEach(invoice =>{
             optionElement = document.createElement('option');
-            optionElement.value = invoice.id();
-            optionElement.textContent = invoice.name();
+            optionElement.value = invoice.id;
+            optionElement.textContent = invoice.name;
             domElements.push(
                 optionElement    
             )
         })
         return domElements;
+    }
+
+    setInvoiceFromID(id){
+        this.invoices.forEach(invoice=>{
+            if(invoice.id == id){
+                this.selected_invoices=invoice
+            }
+        })
+    }
+
+    async completeSelectedInvoice(){
+        let response;
+        let invoice_detail;
+        let products = []
+        let line;
+        try {
+           response = await fetch(
+            URL= `invoice_detail?id=${this.selected_invoices.id}`
+           )
+           invoice_detail = await response.json()
+
+           this.selected_invoices.customer_name = invoice_detail.invoice.client
+           this.selected_invoices.total_price = invoice_detail.invoice.untax_total
+
+
+           invoice_detail.invoice.products.forEach(product => {
+                line = new InvoiceLine(
+                    0,
+                    this.selected_invoices.id,
+                    0,                
+                    product.name,
+                    product.qty,
+                    product.u_price,
+                    product.tax
+                )
+                products.push(line)
+
+           })
+           this.selected_invoices.products = products
+
+
+        } catch (error) {
+            console.error('Error calling method: ', error);
+        }
+    }
+
+    getTableElements(){
+        let table = document.createElement("table");
+        let headerElem;
+        let headers = [
+            "Producto", 
+            "Cliente", 
+            "Importe"
+        ]
+        let headerRow = document.createElement("tr")
+        headers.forEach(header => {
+            headerElem = document.createElement("th")
+            headerElem.textContent = header
+            headerRow.appendChild(headerElem)
+            table.appendChild(headerRow)
+        })
+        this.selected_invoices.products.forEach( product => {
+            let tableRowData = document.createElement("tr")
+            let product1 = document.createElement("td")
+            let customer = document.createElement("td")
+            let total = document.createElement("td")
+            product1.textContent = product.product_name
+            customer.textContent = this.selected_invoices.customer_name
+            total.textContent = `${this.selected_invoices.total_price} / ${product.qty} = ${this.selected_invoices.total_price/product.qty}`
+            tableRowData.appendChild(
+                product1
+            )
+            tableRowData.appendChild(
+                customer
+            )
+            tableRowData.appendChild(
+                total
+            )
+            table.appendChild(tableRowData)
+            
+        })
+
+        return table
     }
 
     get invoices() {

@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve" >
     <t t-name="accounting-extention.prorrateo_template" owl="1">
-        <div>
-            <h1>
-            Pito
-            </h1>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h1>
+                        Select invoice:
+                    </h1>
+                </div>
+                <div class="col">
+                    <select t-ref="invoiceSelector" t-on-change="selectState">
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col" t-ref="table">
+                </div>
+            </div>
+            
         </div>
     </t>
 </templates>
