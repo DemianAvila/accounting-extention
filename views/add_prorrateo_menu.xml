@@ -1,11 +1,16 @@
 <odoo>
     <data>
+        <record id="open_prorrateo_window" model="ir.actions.client">
+            <field name="name">open_prorrateo_window</field>
+            <field name="tag">open_prorrateo_window</field>
+        </record>
+
         <menuitem
-        id="spreadsheet_dashboard_menu"
-        name="Dashboards"
-        parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root"
-        action="integra_dashboard_open"
-        sequence="1"
+        id="account_extention_menu"
+        name="Prorrateo"
+        parent="account.menu_finance"
+        action="open_prorrateo_window"
+        sequence="50"
         />
     </data>
 </odoo>

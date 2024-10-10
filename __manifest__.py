@@ -20,7 +20,15 @@
         # 'security/ir.model.access.csv',
         #'views/views.xml',
         #'views/templates.xml',
+        'views/add_prorrateo_menu.xml'
     ],
     
+    'assets': {
+        'web.assets_backend': [
+            'accounting-extention/static/src/js/modules/**/*',
+            'accounting-extention/static/src/js/prorrateo_action.js',
+            'accounting-extention/static/src/xml/prorrateo_template.xml'
+        ]
+    },
 }
 
